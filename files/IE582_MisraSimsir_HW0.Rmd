@@ -1,0 +1,35 @@
+---
+title: "Interesting R Examples"
+author: "Mısra Şimşir - IE582 - Fall 2020"
+output: html_document
+---
+
+
+```{r,echo=FALSE,results="hide"}
+library(knitr)
+opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
+```
+
+1. [Exploring Survival on the Titanic](https://www.kaggle.com/mrisdal/exploring-survival-on-the-titanic)
+
+    This example is important because it is an R Notebook on Titanic data set. Titanic is considered as one of the Data Science 101 data set and this notebook provides a good exploratory data analysis. It is also a Kaggle Kernel, which is a very good source for this kind of example R codes. The notebook also covers feature engineering, missing data imputation and modeling.
+
+2. [Handwriting Recognition](https://www.kaggle.com/landlord/handwriting-recognition)
+
+    This example can be interesting and one of good examples of machine learning applications. We can build a model that recognize the handwritings which are special to person. For example, this model can be useful in universities for attendence.
+
+3. [Novel Corona Virus 2019 Dataset](https://www.kaggle.com/sudalairajkumar/novel-corona-virus-2019-dataset)
+
+    Covid19 is the most important topic in the world and affets our lifes more than anything so it can be good for working on it for prediction how epidemic will end, predict the spreading of coronavirus or specific predictions for countries and etc.
+
+4. [Suicide Rates Overview 1985 to 2016](https://www.kaggle.com/russellyates88/suicide-rates-overview-1985-to-2016)
+
+    Crime rates in a country are affected from social, cultural, socio-economic conditions and development levels. We can make analysis about is there any correlation between these topics and crime rates in a coutry. Also data has attributes based on years so we can make analyzes to see if the development levels of countries have made any changes in the crime rates over the years.
+
+5. [Heart Disease UCI](https://www.kaggle.com/ronitf/heart-disease-uci)
+
+    This data can be a good example of classification. We can work on it to built a model which tells us if the patient has heart disease or not. It can be good for early diagnosis of patients for doctors.
+
+6. [Credit Card Fraud Detection](https://www.kaggle.com/mlg-ulb/creditcardfraud)
+
+    This is another classification example and for companies it is very important to recognize fraudulent credit card transactions so that customers should be safe. We can detect a transaction which is fraudulent by building a model. 
