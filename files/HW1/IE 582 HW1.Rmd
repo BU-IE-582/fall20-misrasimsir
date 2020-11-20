@@ -1,0 +1,182 @@
+---
+title: "IE 582 HW1"
+output: html_document
+---
+
+## TASK 1 
+```{r}
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+```
+
+##### Combining data
+
+```{r}
+E0 <- read.csv("C:/Users/ASUS/Downloads/E0 (1).csv")
+E02 <- read.csv("C:/Users/ASUS/Downloads/E0 (2).csv")
+E03 <- read.csv("C:/Users/ASUS/Downloads/E0 (3).csv")
+data_2020=E0[,1:56]
+data_2019=E02[,1:56]
+data_2018=E03[,1:56]
+premier_data=rbind(data_2020,data_2019)
+premierdata=bind_rows(premier_data,data_2018)
+premierdata=premierdata[,1:56]
+attach(premierdata)
+```
+
+### Question 1
+
+```{r}
+par(mfrow=c(1,3))  
+hist(FTHG,col = "3",xlab="Home Team Goals", ylab="Number of Games")
+hist(FTAG,col="darkmagenta",xlab="Away Team Goals", ylab="Number of Games")
+hist(FTHG-FTAG,col="7",xlab="FTHG-FTAG", ylab="Number of Difference of Teams")
+
+```
+
+### Question 2
+```{r}
+# Actual Outcomes 
+par(mfrow=c(1,2))
+hist(FTHG,col = "3",xlab="Home Team Goals", ylab="Number of Games")
+lines(0:8, dpois(c(0:8), mean(FTHG))*sum(FTHG), col = "red",lwd=2)
+hist(FTAG,col="darkmagenta",xlab="Away Team Goals", ylab="Number of Games")
+lines(0:8, dpois(c(0:8), mean(FTAG))*sum(FTAG), col = "red",lwd=2)
+```
+
+##### First graph shows that Home Team Goals is distributed poisson with lamda=1.535
+##### Second graph shows that Away Team Goals is distributed poisson with lamda=1.269
+
+## TASK 2
+### Question 1
+```{r}
+Bet365=premierdata[,c(8,25,26,27)]
+BetAndWin=premierdata[,c(8,28,29,30)]
+Pinnacle=premierdata[,c(8,34,35,36)]
+WH=premierdata[,c(8,37,38,39)]
+Bet365$home_prob=1/Bet365$B365H
+Bet365$away_prob=1/Bet365$B365A
+Bet365$draw_prob=1/Bet365$B365D
+BetAndWin$home_prob=1/BetAndWin$BWH
+BetAndWin$away_prob=1/BetAndWin$BWA
+BetAndWin$draw_prob=1/BetAndWin$BWD
+Pinnacle$home_prob=1/Pinnacle$PSH
+Pinnacle$draw_prob=1/Pinnacle$PSD
+Pinnacle$away_prob=1/Pinnacle$PSA
+WH$home_prob=1/WH$WHH
+WH$away_prob=1/WH$WHA
+WH$draw_prob=1/WH$WHD
+
+```
+
+#### Question 2
+```{r}
+#Normalization
+Bet365$home_norm=Bet365$home_prob*(1/(Bet365$home_prob+Bet365$away_prob+Bet365$draw_prob))
+Bet365$away_norm=Bet365$away_prob*(1/(Bet365$home_prob+Bet365$away_prob+Bet365$draw_prob))
+Bet365$draw_norm=Bet365$draw_prob*(1/(Bet365$home_prob+Bet365$away_prob+Bet365$draw_prob))
+BetAndWin$draw_norm=BetAndWin$draw_prob*(1/(BetAndWin$home_prob+BetAndWin$away_prob+BetAndWin$draw_prob))
+BetAndWin$home_norm=BetAndWin$home_prob*(1/(BetAndWin$home_prob+BetAndWin$away_prob+BetAndWin$draw_prob))
+BetAndWin$away_norm=BetAndWin$away_prob*(1/(BetAndWin$home_prob+BetAndWin$away_prob+BetAndWin$draw_prob))
+Pinnacle$draw_norm=Pinnacle$draw_prob*(1/(Pinnacle$home_prob+Pinnacle$away_prob+Pinnacle$draw_prob))
+Pinnacle$home_norm=Pinnacle$home_prob*(1/(Pinnacle$home_prob+Pinnacle$away_prob+Pinnacle$draw_prob))
+Pinnacle$away_norm=Pinnacle$away_prob*(1/(Pinnacle$home_prob+Pinnacle$away_prob+Pinnacle$draw_prob))
+
+WH$draw_norm=WH$draw_prob*(1/(WH$home_prob+WH$away_prob+WH$draw_prob))
+WH$home_norm=WH$home_prob*(1/(WH$home_prob+WH$away_prob+WH$draw_prob))
+WH$away_norm=WH$away_prob*(1/(WH$home_prob+WH$away_prob+WH$draw_prob))
+
+```
+
+#### Question 3
+```{r,warning=FALSE}
+
+ggplot(Bet365, aes(Bet365$home_prob-Bet365$away_prob,Bet365$draw_prob)) + 
+  geom_point()+ xlab("P(Home Win)–P(Away Win)") + 
+  ylab("P (Tie)") +  ggtitle("Bet 365")+
+  geom_smooth()
+
+```
+
+```{r}
+# For estimated probabilities we discretize P(home win) – P(away win) values into bins (-1,-0.8], (-0.8, -0.6], …, (0.8,1]).
+Bet365$prob_range<-cut(Bet365$home_prob-Bet365$away_prob,breaks = seq(-1,1,by=0.2))
+# Then we calculate the number of games ended as “Draw” in the corresponding bin.
+B365_total <- as.numeric(table(Bet365$prob_range))
+B365_draw <- as.numeric(table(Bet365$prob_range[Bet365$FTR=="D"]))
+prob_B365_D <- B365_draw / B365_total
+
+mean <- c(-0.9,-0.7,-0.5,-0.3,-0.1,0.1,0.3,0.5,0.7,0.9)
+plot(Bet365$home_prob-Bet365$away_prob, Bet365$draw_prob, col="red", 
+     xlab="P(HomeWin)-P(AwayWin)", ylab="P(Tie)", main="Bet365")
+points(mean, prob_B365_D, col="darkmagenta", pch=12)
+```
+
+#### Question 4 
+
+```{r}
+# We will do the same thing for four bookmaker.
+ggplot(BetAndWin, aes(BetAndWin$home_prob-BetAndWin$away_prob,BetAndWin$draw_prob)) + 
+  geom_point()+ xlab("P(Home Win)–P(Away Win)") + 
+  ylab("P (Tie)") +  ggtitle("BetAndWin")+
+  geom_smooth()
+
+```
+
+```{r}
+# For estimated probabilities we discretize P(home win) – P(away win) values into bins (-1,-0.8], (-0.8, -0.6], …, (0.8,1]).
+BetAndWin$prob_range<-cut(BetAndWin$home_prob-BetAndWin$away_prob,breaks = seq(-1,1,by=0.2))
+# Then we calculate the number of games ended as “Draw” in the corresponding bin.
+Betwin_total <- as.numeric(table(BetAndWin$prob_range))
+Betwin_draw <- as.numeric(table(BetAndWin$prob_range[BetAndWin$FTR=="D"]))
+prob_Betwin_D <- Betwin_draw / Betwin_total
+
+mean <- c(-0.9,-0.7,-0.5,-0.3,-0.1,0.1,0.3,0.5,0.7,0.9)
+plot(BetAndWin$home_prob-BetAndWin$away_prob, BetAndWin$draw_prob, col="red", 
+     xlab="P(HomeWin)-P(AwayWin)", ylab="P(Tie)", main="BetAndWin")
+points(mean, prob_Betwin_D, col="darkmagenta", pch=12)
+
+```
+
+```{r}
+ggplot(Pinnacle, aes(Pinnacle$home_prob-Pinnacle$away_prob,Pinnacle$draw_prob)) + 
+  geom_point()+ xlab("P(Home Win)–P(Away Win)") + 
+  ylab("P (Tie)") +  ggtitle("Pinnacle")+
+  geom_smooth()
+```
+
+```{r}
+Pinnacle$prob_range<-cut(Pinnacle$home_prob-Pinnacle$away_prob,breaks = seq(-1,1,by=0.2))
+# Then we calculate the number of games ended as “Draw” in the corresponding bin.
+Pinn_total <- as.numeric(table(Pinnacle$prob_range))
+Pinn_draw <- as.numeric(table(Pinnacle$prob_range[Pinnacle$FTR=="D"]))
+prob_Pinn_D <- Pinn_draw / Pinn_total
+
+mean <- c(-0.9,-0.7,-0.5,-0.3,-0.1,0.1,0.3,0.5,0.7,0.9)
+plot(Pinnacle$home_prob-Pinnacle$away_prob, Pinnacle$draw_prob, col="red", 
+     xlab="P(HomeWin)-P(AwayWin)", ylab="P(Tie)", main="Pinnacle")
+points(mean, prob_Pinn_D, col="darkmagenta", pch=12)
+
+```
+
+```{r}
+ggplot(WH, aes(WH$home_prob-WH$away_prob,WH$draw_prob)) + 
+  geom_point()+ xlab("P(Home Win)–P(Away Win)") + 
+  ylab("P (Tie)") +  ggtitle("WH")+
+  geom_smooth()
+```
+```{r}
+WH$prob_range<-cut(WH$home_prob-WH$away_prob,breaks = seq(-1,1,by=0.2))
+# Then we calculate the number of games ended as “Draw” in the corresponding bin.
+WH_total <- as.numeric(table(WH$prob_range))
+WH_draw <- as.numeric(table(WH$prob_range[WH$FTR=="D"]))
+prob_WH_D <- WH_draw / WH_total
+
+mean <- c(-0.9,-0.7,-0.5,-0.3,-0.1,0.1,0.3,0.5,0.7,0.9)
+plot(WH$home_prob-WH$away_prob, WH$draw_prob, col="red", 
+     xlab="P(HomeWin)-P(AwayWin)", ylab="P(Tie)", main="WH")
+points(mean, prob_Pinn_D, col="darkmagenta", pch=12)
+
+```
+
